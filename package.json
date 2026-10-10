@@ -1,0 +1,15 @@
+{
+  "name": "doubtdoor",
+  "version": "1.0.0",
+  "description": "Doubtdoor: AI doubt solving + local tutors, online or at home",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Confirm a home visit | Doubtdoor</title>
+<meta name="theme-color" content="#0f8a4f">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="brand" href="/"><span id="logo"></span>Doubtdoor</a></div></header>
+<main class="page"><div class="wrap" style="max-width:560px" id="box"><p class="muted">Loading…</p></div></main>
+<script src="ui.js"></script>
+<script>
+$('#logo').innerHTML = LOGO;
+const q = new URLSearchParams(location.search);
+const id = q.get('id'), code = q.get('code');
+async function load() {
+  const box = $('#box');
+  try {
+    const d = await api(`/api/parent/${encodeURIComponent(id)}?code=${encodeURIComponent(code)}`);
+    const done = d.status === 'confirmed';
+    box.innerHTML = `
+      <h2>${done ? 'Thank you, this is confirmed' : 'Please confirm this home visit'}</h2>
+      <p class="muted" style="margin-top:8px">${esc(d.studentName)} has asked for a ${d.kind === 'plan' ? 'weekly plan with a home visit' : 'home visit'}. Doubtdoor asks a parent or guardian to approve every home visit.</p>
+      <dl class="kv" style="margin:18px 0">
+        <dt>Tutor</dt><dd>${esc(d.tutorName)}</dd>
+        <dt>Subject</dt><dd>${esc(d.subject)}</dd>
+        <dt>When</dt><dd>${esc(d.when)}</dd>
+        <dt>Parent or guardian</dt><dd>${esc(d.parentName)}</dd>
+      </dl>
+      <div class="note">Tip: be at home during the visit, and ask the tutor to show the profile on the Doubtdoor app.</div>
+      ${done ? `<p style="margin-top:18px" class="pill">Confirmed</p>` : `<button class="btn lg" id="ok" style="margin-top:18px">Yes, I confirm</button> <p class="err" id="e"></p>`}`;
+    const ok = $('#ok');
+    if (ok) ok.onclick = async () => {
+      ok.disabled = true;
+      try { await api(`/api/parent/${encodeURIComponent(id)}/confirm`, { code }); load(); }
+      catch (e) { $('#e').textContent = e.message; ok.disabled = false; }
+    };
+  } catch (e) {
+    box.innerHTML = `<h2>This link does not work</h2><p class="muted" style="margin-top:8px">${esc(e.message)}. Ask the student to share the confirmation link again.</p>`;
+  }
+}
+load();
+</script>
+</body>
+</html>
